@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: Jurassic Park CI/CD Pipeline
 
 on:
   push:
@@ -6,16 +6,21 @@ on:
   pull_request:
     branches: [main]
 
+env:
+  DOCKER_BACKEND_IMAGE: clovis98/incident-backend
+  DOCKER_FRONTEND_IMAGE: clovis98/incident-frontend
+  TAG: latest
+
 jobs:
   build-test:
-    name: Build & Test Backend
+    name: Build & Test
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -30,7 +35,7 @@ jobs:
         run: npm test
 
   docker-build-push:
-    name: Build & Push Docker images
+    name: Build & Push Docker Images
     runs-on: ubuntu-latest
     needs: build-test
     if: github.ref == 'refs/heads/main'
@@ -42,18 +47,22 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          username: clovis98
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-      - name: Build & Push Backend Image
+      - name: Build & Push Backend
         run: |
-          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/incident-backend:latest -f docker/backend/Dockerfile .
-          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/incident-backend:latest
+          docker build \
+            -t $DOCKER_BACKEND_IMAGE:$TAG \
+            -f docker/backend/Dockerfile .
+          docker push $DOCKER_BACKEND_IMAGE:$TAG
 
-      - name: Build & Push Frontend Image
+      - name: Build & Push Frontend
         run: |
-          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/incident-frontend:latest -f docker/frontend/Dockerfile .
-          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/incident-frontend:latest
+          docker build \
+            -t $DOCKER_FRONTEND_IMAGE:$TAG \
+            -f docker/frontend/Dockerfile .
+          docker push $DOCKER_FRONTEND_IMAGE:$TAG
 
   deploy-k8s:
     name: Deploy to Kubernetes
@@ -65,11 +74,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Kubeconfig
-        run: |
-          mkdir -p ~/.kube
-          echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
 
-      - name: Deploy manifests
+      - name: Configure Kubernetes
         run: |
-          kubectl apply -f k8s/
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 --decode > $HOME/.kube/config
+          kubectl config set-context --current --namespace=default
+
+      - name: Deploy Application
+        run: |
+          kubectl apply -f k8s/ -R
+          kubectl rollout status deployment/backend
+          kubectl rollout status deployment/frontend
+
+      - name: Verify Deployment
+        run: |
+          kubectl get pods -o wide
+          kubectl get svc
+          kubectl get ingress
