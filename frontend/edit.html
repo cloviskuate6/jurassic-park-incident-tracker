@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Modifier statut</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Modifier le statut</h1>
+  <form id="editForm">
+    <input type="number" name="id" placeholder="ID de l'incident" required />
+    <select name="status">
+      <option value="En cours">En cours</option>
+      <option value="Résolu">Résolu</option>
+    </select>
+    <button type="submit">Mettre à jour</button>
+  </form>
+  <a href="index.html">⬅ Retour</a>
+  <script>
+    document.getElementById('editForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = new FormData(e.target);
+      const id = form.get('id');
+      const status = form.get('status');
+      const res = await fetch(`http://localhost:3000/api/incidents/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': 'Bearer admin-token',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status })
+      });
+      if (res.ok) {
+        alert('Statut mis à jour');
+        location.href = 'index.html';
+      } else {
+        alert('Erreur : ' + res.status);
+      }
+    });
+  </script>
+</body>
+</html>

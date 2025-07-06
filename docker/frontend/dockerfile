@@ -1,0 +1,11 @@
+# Étape unique : Serveur Nginx pour héberger les fichiers statiques
+FROM nginx:alpine
+
+# Copier les fichiers HTML/CSS/JS dans le dossier public de Nginx
+COPY frontend/ /usr/share/nginx/html
+
+# Exposer le port 80
+EXPOSE 80
+
+# Lancer Nginx
+CMD ["nginx", "-g", "daemon off;"]

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Ajouter un incident</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Ajouter un nouvel incident</h1>
+  <form id="incidentForm">
+    <input type="text" name="title" placeholder="Titre" required />
+    <textarea name="description" placeholder="Description" required></textarea>
+    <select name="type">
+      <option value="Evasion">Evasion</option>
+      <option value="Panne">Panne</option>
+      <option value="Blessure">Blessure</option>
+    </select>
+    <input type="text" name="zone" placeholder="Zone" required />
+    <select name="urgency">
+      <option value="Basse">Basse</option>
+      <option value="Moyenne">Moyenne</option>
+      <option value="Haute">Haute</option>
+    </select>
+    <button type="submit">Créer</button>
+  </form>
+  <a href="index.html">⬅ Retour</a>
+  <script>
+    document.getElementById('incidentForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(e.target));
+      const res = await fetch('http://localhost:3000/api/incidents', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer admin-token',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+      if (res.ok) {
+        alert('Incident ajouté');
+        location.href = 'index.html';
+      } else {
+        alert('Erreur : ' + res.status);
+      }
+    });
+  </script>
+</body>
+</html>

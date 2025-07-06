@@ -1,0 +1,33 @@
+body {
+  font-family: sans-serif;
+  margin: 2rem;
+  background: #f4f4f4;
+}
+h1 {
+  color: #2a5d78;
+}
+form {
+  display: flex;
+  flex-direction: column;
+  width: 300px;
+}
+input, textarea, select, button {
+  margin: 0.5rem 0;
+  padding: 0.5rem;
+}
+button {
+  background: #2a5d78;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+ul {
+  list-style: none;
+  padding-left: 0;
+}
+li {
+  background: white;
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  border-left: 5px solid #2a5d78;
+}

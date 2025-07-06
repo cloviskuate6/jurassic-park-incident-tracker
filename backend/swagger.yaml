@@ -1,0 +1,57 @@
+openapi: 3.0.0
+info:
+  title: Incident Tracker API
+  version: '1.0'
+paths:
+  /api/incidents:
+    get:
+      summary: Liste les incidents
+      responses:
+        '200':
+          description: Liste des incidents
+    post:
+      summary: Crée un incident
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Incident'
+      responses:
+        '201':
+          description: Créé
+  /api/incidents/{id}:
+    patch:
+      summary: Modifie le statut d’un incident
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+      responses:
+        '200':
+          description: Mis à jour
+components:
+  schemas:
+    Incident:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+        zone:
+          type: string
+        urgency:
+          type: string
